@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
 
     // nuolinäppäimet vasemmalle ja oikealle / A ja D painetaanko
     float horizontalInput;
+    // nuolinäppäimet ylös ja alas / W ja S painetaanko
+    float verticalInput;
 
     private Vector2 movement;
 
@@ -21,9 +23,22 @@ public class PlayerController : MonoBehaviour
     // onko pelaaja maassa
     private bool grounded;
 
+    // voiko pelaaja kiivetä
+    private bool canClimb;
+
+    // kiipeääkö pelaaja
+    private bool isClimbing;
+
+    // tikkaat paikka
+    private Transform ladder; ///////////
+
+    // pelaajan pituus
+    private float playerHeight; ///////////
+
     void Start()
     {
         player = GetComponent<Rigidbody2D>();
+        playerHeight = GetComponent<SpriteRenderer>().size.y; /////////
     }
 
     void Update()
@@ -31,7 +46,7 @@ public class PlayerController : MonoBehaviour
         //haetaan se, painetaanko nuolinäppäimiä/AD näppäimiä
         horizontalInput = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetKeyDown("space")){
+        if (Input.GetKeyDown("space") && grounded){
             player.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
 
