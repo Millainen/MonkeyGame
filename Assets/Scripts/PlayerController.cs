@@ -38,16 +38,43 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         player = GetComponent<Rigidbody2D>();
-        playerHeight = GetComponent<SpriteRenderer>().size.y; /////////
+        playerHeight = GetComponent<SpriteRenderer>().size.y; 
     }
 
     void Update()
     {
         //haetaan se, painetaanko nuolinäppäimiä/AD näppäimiä
         horizontalInput = Input.GetAxisRaw("Horizontal");
+        // haetaan se, painetaanko nuolinäppäimiä ylös alas/WS näppäimiä
+        verticalInput = Input.GetAxisRaw("Vertical"); ////////////
 
-        if (Input.GetKeyDown("space") && grounded){
+        if (Input.GetKeyDown("space") && grounded && !isClimbing){
             player.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        }
+
+        movement.y = 0; //////
+
+        if(canClimb){ 
+            if(verticalInput != 0 && grounded && horizontalInput == 0){ ///
+                isClimbing = true;
+            }
+        } else { 
+            isClimbing = false; 
+        } 
+
+
+        if(isClimbing){ 
+            if(player.position.y <= ladder.transform.GetChild(0).transform.position.y + playerHeight/2 
+            && player.position.y >= ladder.transform.GetChild(1).transform.position.y - 0.1f){ 
+                player.velocity = Vector2.zero; //////
+                player.isKinematic = true; ///////
+                movement.y = verticalInput * moveSpeed; ///////
+                player.position = new Vector2(ladder.transform.position.x, player.position.y); ///////
+            } else { 
+                isClimbing = false; 
+            }
+        } else{ 
+            player.isKinematic = false;
         }
 
         movement.x = horizontalInput * moveSpeed;
@@ -63,13 +90,23 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Platform")){
+        if(collision.gameObject.CompareTag("Platform")){
             grounded = true;
         }
+
+        if(collision.gameObject.CompareTag("Ladder")){ 
+            canClimb = true; 
+            ladder = collision.transform;
+        } 
     }
+
     void OnTriggerExit2D(Collider2D collision){
         if(collision.gameObject.CompareTag("Platform")){
             grounded = false;
         }
+
+        if(collision.gameObject.CompareTag("Ladder")){ 
+            canClimb = false;
+        } 
     }
 }
